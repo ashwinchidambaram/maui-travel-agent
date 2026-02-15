@@ -12,6 +12,7 @@ def create_mock_user_profile() -> UserProfile:
         temperature_range = (70, 75),
         airfare_budget_preferred = 500,
         airfare_budget_max = 1000,
+        home_airport = 'SEA',
         hotel_price_range = (100, 300),
         trip_duration_days = 9,
         brand_preferences = None,

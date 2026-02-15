@@ -17,6 +17,10 @@ class UserProfile(BaseModel):
         description = "Absolute maximum for round-trip airfare in USD. Example: 1000"
     )   
 
+    home_airport: str = Field(
+        description = "User's Home Airport that they will depart from. Example: 'SFO', 'SEA', 'OAK'"
+    )
+
     hotel_price_range: tuple[float, float] = Field(
         description = "Preferred hotel price per night in USD (min, max). Example: (100, 350)"
     )       
