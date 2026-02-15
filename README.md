@@ -132,16 +132,13 @@ Same approach — three options spanning under budget, best fit, and over budget
 ## Design Decisions
 
 **Today's date in the system instruction**
-Early in testing, the agent invented July 2024 as the trip date. Agents don't have reliable access to the current date, so it guessed — and guessed incorrectly. Injecting today's date as an f-string into the instruction fixed this immediately.
+Early in testing, the agent invented July 2024 as the trip date. Agents don't have reliable access to the current date, so it guessed incorrectly. Injecting today's date as an f-string into the instruction fixed this immediately.
 
 **`home_airport` as a profile field**
-Flight search needs an origin. Rather than hardcoding it or letting the agent assume, it lives in the user profile. Makes the agent's reasoning traceable: it searched from SEA because that's what the profile says.
-
-**Text returns for flights and hotels**
-The agent reasons about these in natural language anyway, so a clean text summary works better than a JSON object and costs less in context. The brief also penalizes bloated tool outputs — this keeps things tight.
+Flight search needs an origin. I added this as a facet of the User Profile rather than hardcode it since that would be something that would be inferred as a User prefernece. In this project's case, I set the user profile to prefer flights from SEA since that's where I currently reside. 
 
 **Mock data for flights and hotels**
-No free real-time flight or hotel search API exists. The interesting part of the system is how the agent evaluates options against preferences, not where the data comes from.
+No free real-time flight or hotel search API exists. As a result I mocked this data in the tool call for flights and hotels with expectations that the Agent will reason on the presented options based on my User's preferences. 
 
 **All tools are read-only**
 No tool modifies state, so idempotency is inherent — retrying any tool call produces the same result with no side effects. If booking or reservation tools were added in a future version, they would require explicit idempotency keys to prevent duplicate charges on retry.
@@ -182,7 +179,7 @@ LLM_PROVIDER=ollama     # needs Ollama running locally, set OLLAMA_MODEL too
 
 ---
 
-## Stack
+## Tech Stack
 
 | | |
 |--|--|
