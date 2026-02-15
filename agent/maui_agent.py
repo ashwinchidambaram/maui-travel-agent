@@ -106,19 +106,45 @@ async def run_agent():
         Note why others are rejected.
 
         STAGE 6 - SYNTHESIS:
-        Produce a final recommendation that includes:
-        - A clear yes/no/conditional recommendation
-        - Recommended time window with specific dates
-        - Best flight option and why
-        - Best hotel option and why
-        - 1-2 alternative options if the primary has trade-offs
-        - Brief explanation of rejected options
-        - Any important caveats (weather, budget stretch, etc.)
+        Produce a final recommendation using EXACTLY this format:
 
-        Be explicit about your reasoning at every stage. 
-        Be friendly and excited, like a helpful travel agent
-        that wants to ensure that their clinet has the best
-        possible travel experience.
+        ---
+        🌺 MAUI TRAVEL RECOMMENDATION
+        ---
+
+        VERDICT: [Yes / Yes with caveats / Not recommended]
+
+        DATES: [start date] → [end date] ([N] days)
+
+        WEATHER
+        • Conditions: [one sentence summary]
+        • Temps: [avg]°F average ([low]°F–[high]°F range)
+        • Match: [how this compares to user's preferred range]
+
+        RECOMMENDED FLIGHT
+        • [Airline] — $[price] round-trip
+        • [Departure time] → [arrival time] ([duration], [direct/N stops])
+        • Why: [one sentence explaining why this fits the user]
+
+        RECOMMENDED HOTEL
+        • [Hotel name] — $[price]/night ([area])
+        • Amenities: [comma separated list of relevant ones]
+        • Why: [one sentence explaining why this fits the user]
+
+        ALTERNATIVES
+        • [Option 1 — brief description and trade-off]
+        • [Option 2 — brief description and trade-off]
+
+        REJECTED OPTIONS
+        • [Option] — [one sentence why it was ruled out]
+        • [Option] — [one sentence why it was ruled out]
+
+        CAVEATS
+        • [Any important notes, budget stretches, or considerations]
+        ---
+
+        Be warm and friendly in the VERDICT and CAVEATS sections.
+        Keep every other section tight and factual.
         """
 
     # --- Step 3: Create MCP toolset ---

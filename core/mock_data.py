@@ -15,7 +15,7 @@ def create_mock_user_profile() -> UserProfile:
         home_airport = 'SEA',
         hotel_price_range = (100, 300),
         trip_duration_days = 9,
-        brand_preferences = None,
+        brand_preferences = ["Marriott"],
         safety_preferences = None,
         comfort_preferences = "Prefer ocean view, require non-smoking room, prefer gym ameneties, prefer being located near more natural scenery than touristy areas",
         additional_notes = "no red-eye flights"

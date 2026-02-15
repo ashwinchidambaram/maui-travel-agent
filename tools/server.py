@@ -105,6 +105,7 @@ def search_hotels(check_in: str, check_out: str) -> str:
 
             Option 2 - Best Fit/Natural Setting:
             Kaanapali Beach Hotel | Kaanapali (natural beach, less commercialized)
+            Brand: Marriott Autograph Collection
             $235/night | Non-smoking: Yes
             Amenities: Free WiFi, Pool, Gym, Direct Beach Access, Restaurant
             Ocean view: Yes (partial)

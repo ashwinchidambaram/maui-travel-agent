@@ -1,0 +1,63 @@
+/Users/ashwinchidambaram/dev/AI Agents Bootcamp/Project 1 - Travel Agent/.venv/lib/python3.12/site-packages/google/adk/features/_feature_decorator.py:72: UserWarning: [EXPERIMENTAL] feature FeatureName.BASE_AUTHENTICATED_TOOL is enabled.
+  check_feature_enabled()
+Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+🌴 Maui Travel Agent Starting...
+
+============================================================
+
+Using LLM: Gemini - gemini-2.0-flash
+
+User: Is it a good time to go to Maui?
+
+Agent is thinking...
+
+============================================================
+
+🔧 Calling tool: get_user_profile
+✅ Tool returned data
+
+🔧 Calling tool: get_weather_forecast
+✅ Tool returned data
+
+🔧 Calling tool: search_flights
+✅ Tool returned data
+
+🔧 Calling tool: search_hotels
+✅ Tool returned data
+
+🤖 Agent Response:
+
+---
+🌺 MAUI TRAVEL RECOMMENDATION
+---
+
+VERDICT: Yes
+
+DATES: 2026-02-14 → 2026-02-23 (9 days)
+
+WEATHER
+• Conditions: Based on actual forecast: Overcast conditions expected. Total precipitation: 0.3 inches over the period.
+• Temps: 76°F average (69°F–83°F range)
+• Match: Temperatures are slightly warmer than your preferred range of 70-75°F, but still within an acceptable range.
+
+RECOMMENDED FLIGHT
+• Alaska Airlines — $520 round-trip
+• 8:00am → 2:00pm (6hrs, direct)
+• Why: This direct flight fits your budget, avoids red-eye flights, and offers a convenient morning departure.
+
+RECOMMENDED HOTEL
+• Kaanapali Beach Hotel — $235/night (Kaanapali)
+• Amenities: Free WiFi, Pool, Gym, Direct Beach Access, Restaurant
+• Why: This Marriott Autograph Collection hotel meets your brand preference, offers an ocean view, has a gym, and is located in a less touristy, natural area.
+
+ALTERNATIVES
+• Alaska Airlines flight for $410 with one layover — Consider this option if budget is a primary concern and you don't mind a longer travel time.
+• Maui Seaside Hotel for $145/night — This budget-friendly option is clean and affordable but lacks a gym and ocean view.
+
+REJECTED OPTIONS
+• Hawaiian Airlines flight — Ruled out due to the red-eye flight schedule.
+• Grand Wailea Resort — Ruled out due to being significantly over budget.
+
+CAVEATS
+• The weather will be slightly warmer than your ideal temperature. Overall, this looks like a wonderful trip that fits your preferences well!
+---
