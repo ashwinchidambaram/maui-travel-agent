@@ -84,6 +84,7 @@ def _fetch_forecast(start_date: str, end_date: str) -> dict:
         timeout=10.0
     )
     response.raise_for_status()
+    
     return response.json()
 
 
@@ -102,6 +103,7 @@ def _fetch_archive(start_date: str, end_date: str, reference_year: int = None) -
         # Remap to reference year for future date proxies
         archive_start = start.replace(year=reference_year)
         archive_end = end.replace(year=reference_year)
+        
     else:
         # Use actual dates for past lookups
         archive_start = start
@@ -125,15 +127,11 @@ def _fetch_archive(start_date: str, end_date: str, reference_year: int = None) -
 
 def _fetch_climate_normals(start_date: str, end_date: str) -> dict:
     """Fetches typical seasonal conditions using 2023 as reference year."""
+    
     return _fetch_archive(start_date, end_date, reference_year=2023)
 
 
-def _parse_forecast(
-    data: dict,
-    start_date: str,
-    end_date: str,
-    source: str = "forecast"
-) -> WeatherForecast:
+def _parse_forecast(data: dict, start_date: str, end_date: str, source: str = "forecast") -> WeatherForecast:
     """Parses Open-Meteo API response into a WeatherForecast model."""
     
     daily = data["daily"]
