@@ -2,129 +2,135 @@
 
 import asyncio
 import os
+from datetime import date
 from dotenv import load_dotenv
 
-# Google ADK imports (correct for version 1.24.1)
+# Google ADK imports
 from google.adk.agents import LlmAgent
-from google.adk.tools.mcp_tool import McpToolset, StdioConnectionParams
-from google.adk.runners import Runner
+from google.adk.models.lite_llm import LiteLlm
+from google.adk.tools.mcp_tool import McpToolset, StreamableHTTPConnectionParams
 from google.adk.sessions import InMemorySessionService
+from google.adk.runners import Runner
 from google.genai import types
-from mcp import StdioServerParameters
 
 load_dotenv()
 
 
 def get_model_config():
-    """Determines the model configuration based on LLM_PROVIDER."""
+    """
+    Returns model config dict based on LLM_PROVIDER env variable.
+
+    Returns a dict with:
+      - 'model': LiteLlm object (for Anthropic/Ollama) or string (for Gemini)
+      - 'label': human-readable label for logging
+    """
     provider = os.getenv("LLM_PROVIDER", "gemini")
-    
+
     if provider == "anthropic":
         return {
-            "model": "claude-haiku-4-5",
-            "provider": "anthropic"
+            "model": LiteLlm(model="claude-haiku-4-5"),
+            "label": "Anthropic - claude-haiku-4-5"
         }
     elif provider == "ollama":
+        ollama_model = os.getenv("OLLAMA_MODEL", "deepseek-r1:7b")
         return {
-            "model": os.getenv("OLLAMA_MODEL", "deepseek-r1:7b"),
-            "base_url": os.getenv("OLLAMA_HOST", "http://localhost:11434"),
-            "provider": "ollama"
+            "model": LiteLlm(model=f"ollama_chat/{ollama_model}"),
+            "label": f"Ollama - {ollama_model}"
         }
     else:
         return {
             "model": "gemini-2.0-flash",
-            "api_key": os.getenv("GOOGLE_API_KEY"),
-            "provider": "gemini"
+            "label": "Gemini - gemini-2.0-flash"
         }
+
+
+def create_mcp_toolset():
+    """
+    Creates MCPToolset that connects to our HTTP MCP server.
+    Requires tools/server.py to be running on port 9000.
+    """
+    return McpToolset(
+        connection_params=StreamableHTTPConnectionParams(
+            url="http://127.0.0.1:9000/mcp"
+        )
+    )
 
 
 async def run_agent():
     """Creates and runs the Maui travel planning agent."""
 
+    # --- Step 1: Get model config ---
     config = get_model_config()
-    print(f"Using LLM: {config['provider']} - {config['model']}\n")
+    print(f"Using LLM: {config['label']}\n")
 
-    # --- Step 1: Create the MCP Toolset ---
-    # StdioServerParameters tells ADK how to LAUNCH your MCP server
-    mcp_server_params = StdioServerParameters(
-        command="python",
-        args=["-m", "tools.user_profile_tool"],
-    )
+    # --- Step 2: Build instruction with today's date injected ---
+    today = date.today().isoformat()
 
-    # MCPToolset connects ADK to your MCP server
-    mcp_toolset = McpToolset(
-        connection_params=StdioConnectionParams(
-            server_params=mcp_server_params
-        )
-    )
-
-    # --- Step 2: Create the Agent ---
-    agent = LlmAgent(
-        model=config["model"],
-        name="maui_travel_agent",
-        description="A travel planning agent specializing in Maui, Hawaii",
-        tools=[mcp_toolset],
-        instruction="""You are an expert travel planning assistant specializing in Maui, Hawaii.
+    instruction = f"""You are an expert travel planning assistant specializing in Maui, Hawaii.
+Today's date is {today}.
 
 Your goal: Help users determine if it's a good time to visit Maui based on their preferences.
 
 CRITICAL WORKFLOW (follow this EXACTLY):
 1. ALWAYS start by calling get_user_profile to understand their preferences
-2. Analyze the profile to understand what "good time" means for THIS user
-3. Based on their preferences, reason about:
-   - Temperature preferences vs typical Maui weather
-   - Budget constraints
-   - Trip duration
-   - Any specific requirements (ocean view, no red-eye flights, etc.)
+2. When asked "is it a good time to go", use today ({today}) as the trip start date
+3. Calculate end_date by adding trip_duration_days to today's date
+4. Call get_weather_forecast with start_date={today} and the calculated end_date in YYYY-MM-DD format
+5. Compare the forecast temperatures to the user's temperature_range preferences
+6. Give a clear recommendation with reasoning
 
 Be thoughtful and explain your reasoning step by step.
 Don't make assumptions - use the tools available to you."""
+
+    # --- Step 3: Create MCP toolset ---
+    mcp_toolset = create_mcp_toolset()
+
+    # --- Step 4: Create the agent ---
+    agent = LlmAgent(
+        model=config["model"],
+        name="maui_travel_agent",
+        description="A travel planning agent specializing in Maui, Hawaii",
+        tools=[mcp_toolset],
+        instruction=instruction
     )
 
-    # --- Step 3: Set Up Session and Runner ---
-    # Session service manages conversation state (ADK's "memory")
+    # --- Step 5: Set up session and runner ---
     session_service = InMemorySessionService()
 
-    # Create a session (one conversation)
     session = await session_service.create_session(
         app_name="maui_travel_agent",
         user_id="user_001"
     )
 
-    # Runner orchestrates the agent execution loop
     runner = Runner(
         agent=agent,
         app_name="maui_travel_agent",
         session_service=session_service
     )
 
-    # --- Step 4: Run the Agent ---
+    # --- Step 6: Run the agent ---
     user_query = "Is it a good time to go to Maui?"
     print(f"User: {user_query}\n")
     print("Agent is thinking...\n")
     print("=" * 60 + "\n")
 
-    # Create the message in ADK's format
     message = types.Content(
         role="user",
         parts=[types.Part(text=user_query)]
     )
 
-    # Run the agent and stream events
     async for event in runner.run_async(
         user_id="user_001",
         session_id=session.id,
         new_message=message
     ):
-        # Print agent responses as they come in
         if event.is_final_response():
             print("🤖 Agent Response:\n")
             if event.content and event.content.parts:
                 for part in event.content.parts:
                     if part.text:
                         print(part.text)
-        
-        # Show tool calls (so you can see the agent working)
+
         elif event.get_function_calls():
             for call in event.get_function_calls():
                 print(f"🔧 Calling tool: {call.name}")
@@ -149,7 +155,8 @@ def main():
         traceback.print_exc()
         print("\nTroubleshooting:")
         print("1. Check GOOGLE_API_KEY is set in .env")
-        print("2. Check LLM_PROVIDER is set correctly")
+        print("2. Make sure tools/server.py is running: python -m tools.server")
+        print("3. Check LLM_PROVIDER is set correctly")
 
 
 if __name__ == "__main__":
